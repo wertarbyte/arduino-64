@@ -67,6 +67,10 @@ void move_ball() {
 	if ( (ball.y - ball.vy == (D_ROWS-1)) &&
 	     (ball.x - ball.vx >= pos && ball.x - ball.vx - p_width < pos) ) {
 		ball.vy *= -1;  
+		// detect contact with the paddle edge
+		if (ball.x < pos || ball.x >= pos+p_width) {
+			ball.vx *= -1;
+		}
 	}
 	ball.x -= ball.vx;
 	ball.y -= ball.vy;
