@@ -26,7 +26,7 @@ const int rows[D_ROWS] = {
 int active_row = 0;
 
 // when did we last update the ball position
-int lastmove;
+unsigned long lastmove;
 // update the positions every _ milliseconds
 int tick = 500;
 
