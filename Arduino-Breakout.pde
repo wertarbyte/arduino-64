@@ -32,6 +32,8 @@ int tick = 500;
 
 // player position (the left edge of the paddle)
 int pos = 0;
+// paddle width
+int p_width = 2;
 
 struct {
 	int x;
@@ -63,7 +65,7 @@ void move_ball() {
 	}
 	// does the ball hit the paddle?
 	if ( (ball.y - ball.vy == (D_ROWS-1)) &&
-	     (ball.x - ball.vx == pos || ball.x - ball.vx == pos+1) ) {
+	     (ball.x - ball.vx >= pos && ball.x - ball.vx - p_width < pos) ) {
 		ball.vy *= -1;  
 	}
 	ball.x -= ball.vx;
@@ -89,17 +91,17 @@ void setup() {
 void loop() {
 	int val = analogRead(A0);
 
-	pos = map(val, 0, 1023-10, 0, D_COLS-2);
+	pos = map(val, 0, 1023-10, 0, D_COLS-p_width);
 
 	digitalWrite(13, HIGH);   // set the LED on
 
 	int line = 0;
 	// draw the player
 	if (active_row == (D_ROWS-1)) {
-		line |= B11<<pos;
+		line |= ((1<<p_width)-1)<<pos;
 	}
 	if (active_row == ball.y) {
-		line |= 1<<(ball.x);
+		line |= B1<<(ball.x);
 	}
 	load_line(line);
 
