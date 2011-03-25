@@ -30,10 +30,11 @@ unsigned long lastmove;
 // update the positions every _ milliseconds
 int tick = 500;
 
-// player position (the left edge of the paddle)
-int pos = 0;
-// paddle width
-int p_width = 2;
+struct {
+	// position (the left edge of the paddle)
+	int pos;
+	int width;
+} paddle;
 
 struct {
 	int x;
@@ -65,10 +66,10 @@ void move_ball() {
 	}
 	// does the ball hit the paddle?
 	if ( (ball.y - ball.vy == (D_ROWS-1)) &&
-	     (ball.x - ball.vx >= pos && ball.x - ball.vx - p_width < pos) ) {
+	     (ball.x - ball.vx >= paddle.pos && ball.x - ball.vx - paddle.width < paddle.pos) ) {
 		ball.vy *= -1;  
 		// detect contact with the paddle edge
-		if (ball.x < pos || ball.x >= pos+p_width) {
+		if (ball.x < paddle.pos || ball.x >= paddle.pos+paddle.width) {
 			ball.vx *= -1;
 		}
 	}
@@ -87,6 +88,8 @@ void setup() {
 	pinMode(DATA, OUTPUT);
 	pinMode(CLOCK, OUTPUT);
 	pinMode(LATCH, OUTPUT);
+
+	paddle.width = 2;
 	
 	lastmove = millis();
 	throw_ball();
@@ -95,14 +98,14 @@ void setup() {
 void loop() {
 	int val = analogRead(A0);
 
-	pos = map(val, 0, 1023-10, 0, D_COLS-p_width);
+	paddle.pos = map(val, 0, 1023-10, 0, D_COLS-paddle.width);
 
 	digitalWrite(13, HIGH);   // set the LED on
 
 	int line = 0;
 	// draw the player
 	if (active_row == (D_ROWS-1)) {
-		line |= ((1<<p_width)-1)<<pos;
+		line |= ((1<<paddle.width)-1)<<paddle.pos;
 	}
 	if (active_row == ball.y) {
 		line |= B1<<(ball.x);
