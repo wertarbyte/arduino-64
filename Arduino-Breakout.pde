@@ -11,8 +11,11 @@
 #define CLOCK 5
 #define LATCH 4
 
+#define D_ROWS 5
+#define D_COLS 7
+
 // pins controlling the rows
-const int rows[5] = {
+const int rows[D_ROWS] = {
 	12,
 	11,
 	10,
@@ -44,7 +47,7 @@ void load_line(byte line) {
 }
 
 void throw_ball() {
-	ball.x = random(7);
+	ball.x = random(D_COLS);
 	ball.y = 0;
 	ball.vx = -1+(random(1)*2);
 	ball.vy = -1;
@@ -52,10 +55,10 @@ void throw_ball() {
 
 void move_ball() {
 	// detect collisions
-	if (ball.x - ball.vx < 0 || ball.x - ball.vx >= 7) {
+	if (ball.x - ball.vx < 0 || ball.x - ball.vx >= D_COLS) {
 		ball.vx *= -1;  
 	}
-	if (ball.y - ball.vy < 0 || ((ball.x - ball.vx) == pos && ball.y == 3) ) {
+	if (ball.y - ball.vy < 0 || ((ball.x - ball.vx) == pos && ball.y == (D_ROWS-2)) ) {
 		ball.vy *= -1;  
 	}
 	ball.x -= ball.vx;
@@ -64,7 +67,7 @@ void move_ball() {
 
 void setup() { 
 	pinMode(13, OUTPUT);
-	for (int i=0; i<5; i++) {
+	for (int i=0; i<D_ROWS; i++) {
 		pinMode(rows[i], OUTPUT);  
 	}
 
@@ -87,7 +90,7 @@ void loop() {
 
 	int line = 0;
 	// draw the player
-	if (active_row == 4) {
+	if (active_row == (D_ROWS-1)) {
 		line |= 1<<pos;
 	}
 	if (active_row == ball.y) {
@@ -106,11 +109,11 @@ void loop() {
 		lastmove = millis();
 	}
 	// lost the ball? wait a moment, then throw in a new one
-	if (ball.y > 4) {
+	if (ball.y > (D_ROWS-1)) {
 		delay(2000);
 		throw_ball();
 	}  
 
 	// advance to next line
-	active_row = (active_row+1) % 5;
+	active_row = (active_row+1) % D_ROWS;
 }
