@@ -167,12 +167,16 @@ void setup() {
 	}
 
 	pinMode(A0, INPUT);
+	// used for seeding the RNG
+	pinMode(A1, INPUT);
 
 	pinMode(DATA, OUTPUT);
 	pinMode(CLOCK, OUTPUT);
 	pinMode(LATCH, OUTPUT);
 
 	paddle.width = 2;
+
+	randomSeed(analogRead(A1));
 
 	init_blocks();
 	
