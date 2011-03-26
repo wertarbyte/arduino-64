@@ -71,6 +71,8 @@ struct {
 	int vy;
 } ball;
 
+boolean blocks[D_ROWS][D_COLS];
+
 void load_line(byte line) {
 	digitalWrite(LATCH, LOW);
 	shiftOut(DATA, CLOCK, MSBFIRST, ~(line));
@@ -78,31 +80,84 @@ void load_line(byte line) {
 }
 
 void throw_ball() {
-	ball.x = random(D_COLS);
-	ball.y = 0;
-	ball.vx = -1+(random(1)*2);
-	ball.vy = -1;
+	ball.x = D_COLS-1;
+	ball.y = D_ROWS-1;
+	ball.vx = 1;
+	ball.vy = 1;
 }
 
-void move_ball() {
-	// detect collisions
+int bounce_ball() {
+	int bounces = 0;
+	// detect collisions with the surroundings
 	if (ball.x - ball.vx < 0 || ball.x - ball.vx >= D_COLS) {
 		ball.vx *= -1;  
+		bounces++;
 	}
 	if (ball.y - ball.vy < 0) {
 		ball.vy *= -1;
+		bounces++;
 	}
 	// does the ball hit the paddle?
 	if ( (ball.y - ball.vy == (D_ROWS-1)) &&
 	     (ball.x - ball.vx >= paddle.pos && ball.x - ball.vx - paddle.width < paddle.pos) ) {
-		ball.vy *= -1;  
+		ball.vy *= -1;
+		bounces++;
 		// detect contact with the paddle edge
 		if (ball.x < paddle.pos || ball.x >= paddle.pos+paddle.width) {
 			ball.vx *= -1;
+			bounces++;
 		}
 	}
+	// handle block collisions
+	if (blocks[ball.y][ball.x - ball.vx]) {
+		blocks[ball.y][ball.x - ball.vx] = false;
+		ball.vx *= -1;
+		bounces++;
+	}
+	if (blocks[ball.y - ball.vy][ball.x]) {
+		blocks[ball.y - ball.vy][ball.x] = false;
+		ball.vy *= -1;
+		bounces++;
+	}
+	if (blocks[ball.y - ball.vy][ball.x - ball.vx]) {
+		blocks[ball.y - ball.vy][ball.x - ball.vx] = false;
+		ball.vy *= -1;
+		ball.vx *= -1;
+		bounces++;
+	}
+	return bounces;
+}
+
+void move_ball() {
+	// bounce the ball around
+	while (bounce_ball() > 0);
+	// and move it once we have a new direction
 	ball.x -= ball.vx;
 	ball.y -= ball.vy;
+}
+
+void init_blocks() {
+	for (int r=0; r<D_ROWS; r++) {
+		for (int c=0; c<D_COLS; c++) {
+			if (r<2) {
+				blocks[r][c] = (random(2) == 0 ? true : false);
+			} else {
+				blocks[r][c] = false;
+			}
+		}
+	}
+}
+
+int blocks_left() {
+	int n = 0;
+	for (int r=0; r<D_ROWS; r++) {
+		for (int c=0; c<D_COLS; c++) {
+			if (blocks[r][c]) {
+				n++;
+			}
+		}
+	}
+	return n;
 }
 
 void setup() { 
@@ -118,6 +173,8 @@ void setup() {
 	pinMode(LATCH, OUTPUT);
 
 	paddle.width = 2;
+
+	init_blocks();
 	
 	lastmove = millis();
 	throw_ball();
@@ -131,6 +188,13 @@ void loop() {
 	digitalWrite(13, HIGH);   // set the LED on
 
 	int line = 0;
+	// draw blocks
+	for (int c=0; c<D_COLS; c++) {
+		if (blocks[active_row][c]) {
+			line |= (B1)<<c;
+		}
+	}
+
 	// draw the player
 	if (active_row == (D_ROWS-1)) {
 		line |= ((1<<paddle.width)-1)<<paddle.pos;
@@ -155,6 +219,12 @@ void loop() {
 		delay(2000);
 		throw_ball();
 	}  
+	// removed all blocks? restart
+	if (blocks_left() == 0) {
+		init_blocks();
+		delay(2000);
+		throw_ball();
+	}
 
 	// advance to next line
 	active_row = (active_row+1) % D_ROWS;
