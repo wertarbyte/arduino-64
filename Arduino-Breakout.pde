@@ -31,6 +31,7 @@
     74HC959 16 (VCC) -> GND
 
     Arduino A0       -> Poti 10 kOhm
+    Arduino  7       -> push button
 
 */
 
@@ -38,6 +39,8 @@
 #define DATA 6
 #define CLOCK 5
 #define LATCH 4
+
+#define BTN 7
 
 #define D_ROWS 5
 #define D_COLS 7
@@ -50,6 +53,8 @@ const int rows[D_ROWS] = {
 	9,
 	8
 };
+
+int btn_state = 0;
 
 int active_row = 0;
 
@@ -69,6 +74,7 @@ struct {
 	int y;
 	int vx;
 	int vy;
+	boolean thrown;
 } ball;
 
 boolean blocks[D_ROWS][D_COLS];
@@ -79,11 +85,12 @@ void load_line(byte line) {
 	digitalWrite(LATCH, HIGH);
 }
 
-void throw_ball() {
-	ball.x = D_COLS-1;
-	ball.y = D_ROWS-1;
+void throw_ball(int x) {
+	ball.x = x;
+	ball.y = D_ROWS-2;
 	ball.vx = 1;
 	ball.vy = 1;
+	ball.thrown = true;
 }
 
 int bounce_ball() {
@@ -129,6 +136,8 @@ int bounce_ball() {
 }
 
 void move_ball() {
+	if (! ball.thrown) return;
+
 	// bounce the ball around
 	while (bounce_ball() > 0);
 	// and move it once we have a new direction
@@ -181,13 +190,20 @@ void setup() {
 	init_blocks();
 	
 	lastmove = millis();
-	throw_ball();
 }
 
 void loop() {
 	int val = analogRead(A0);
 
 	paddle.pos = map(val, 0, 1023-10, 0, D_COLS-paddle.width);
+
+	int new_val = digitalRead(BTN);
+	if (new_val == HIGH && btn_state == LOW) {
+		if (! ball.thrown) {
+			throw_ball(paddle.pos);
+		}
+	}
+	btn_state = new_val;
 
 	digitalWrite(13, HIGH);   // set the LED on
 
@@ -203,7 +219,7 @@ void loop() {
 	if (active_row == (D_ROWS-1)) {
 		line |= ((1<<paddle.width)-1)<<paddle.pos;
 	}
-	if (active_row == ball.y) {
+	if (ball.thrown && active_row == ball.y) {
 		line |= B1<<(ball.x);
 	}
 	load_line(line);
@@ -219,15 +235,13 @@ void loop() {
 		lastmove = millis();
 	}
 	// lost the ball? wait a moment, then throw in a new one
-	if (ball.y > (D_ROWS-1)) {
-		delay(2000);
-		throw_ball();
+	if (ball.thrown && ball.y > (D_ROWS-1)) {
+		ball.thrown = false;
 	}  
 	// removed all blocks? restart
 	if (blocks_left() == 0) {
 		init_blocks();
-		delay(2000);
-		throw_ball();
+		ball.thrown = false;
 	}
 
 	// advance to next line
