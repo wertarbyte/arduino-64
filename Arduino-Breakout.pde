@@ -105,8 +105,8 @@ int bounce_ball() {
 		bounces++;
 	}
 	// does the ball hit the paddle?
-	if ( (ball.y - ball.vy == (D_ROWS-1)) &&
-	     (ball.x - ball.vx >= paddle.pos && ball.x - ball.vx - paddle.width < paddle.pos) ) {
+	if ( (ball.y - ball.vy >= (D_ROWS-1)) &&
+	     (ball.x - ball.vx >= paddle.pos && (ball.x - ball.vx) < paddle.pos+paddle.width) ) {
 		ball.vy *= -1;
 		bounces++;
 		// detect contact with the paddle edge
@@ -114,6 +114,10 @@ int bounce_ball() {
 			ball.vx *= -1;
 			bounces++;
 		}
+	}
+	// the ball might have left the field. Let's check...
+	if (ball.y - ball.vy >= D_ROWS) {
+		return 0;
 	}
 	// handle block collisions
 	if (blocks[ball.y][ball.x - ball.vx]) {
@@ -234,7 +238,7 @@ void loop() {
 		move_ball();
 		lastmove = millis();
 	}
-	// lost the ball? wait a moment, then throw in a new one
+	// lost the ball?
 	if (ball.thrown && ball.y > (D_ROWS-1)) {
 		ball.thrown = false;
 	}  
