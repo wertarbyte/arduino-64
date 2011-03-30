@@ -113,6 +113,10 @@ boolean bounce_ball() {
 		}
 		return true;
 	}
+	// did the ball pass the paddle?
+	if (ball.y - ball.vy > (D_ROWS-1)) {
+		return false;
+	}
 	// handle block collisions
 	if (blocks[ball.y][ball.x - ball.vx]) {
 		blocks[ball.y][ball.x - ball.vx] = false;
