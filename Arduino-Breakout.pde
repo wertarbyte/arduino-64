@@ -93,57 +93,51 @@ void throw_ball(int x) {
 	ball.thrown = true;
 }
 
-int bounce_ball() {
-	int bounces = 0;
+boolean bounce_ball() {
 	// detect collisions with the surroundings
 	if (ball.x - ball.vx < 0 || ball.x - ball.vx >= D_COLS) {
 		ball.vx *= -1;  
-		bounces++;
+		return true;
 	}
 	if (ball.y - ball.vy < 0) {
 		ball.vy *= -1;
-		bounces++;
+		return true;
 	}
 	// does the ball hit the paddle?
 	if ( (ball.y - ball.vy >= (D_ROWS-1)) &&
 	     (ball.x - ball.vx >= paddle.pos && (ball.x - ball.vx) < paddle.pos+paddle.width) ) {
 		ball.vy *= -1;
-		bounces++;
 		// detect contact with the paddle edge
 		if (ball.x < paddle.pos || ball.x >= paddle.pos+paddle.width) {
 			ball.vx *= -1;
-			bounces++;
 		}
-	}
-	// the ball might have left the field. Let's check...
-	if (ball.y - ball.vy >= D_ROWS) {
-		return 0;
+		return true;
 	}
 	// handle block collisions
 	if (blocks[ball.y][ball.x - ball.vx]) {
 		blocks[ball.y][ball.x - ball.vx] = false;
 		ball.vx *= -1;
-		bounces++;
+		return true;
 	}
 	if (blocks[ball.y - ball.vy][ball.x]) {
 		blocks[ball.y - ball.vy][ball.x] = false;
 		ball.vy *= -1;
-		bounces++;
+		return true;
 	}
 	if (blocks[ball.y - ball.vy][ball.x - ball.vx]) {
 		blocks[ball.y - ball.vy][ball.x - ball.vx] = false;
 		ball.vy *= -1;
 		ball.vx *= -1;
-		bounces++;
+		return true;
 	}
-	return bounces;
+	return false;
 }
 
 void move_ball() {
 	if (! ball.thrown) return;
 
 	// bounce the ball around
-	while (bounce_ball() > 0);
+	while (bounce_ball());
 	// and move it once we have a new direction
 	ball.x -= ball.vx;
 	ball.y -= ball.vy;
