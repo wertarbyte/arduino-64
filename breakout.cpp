@@ -2,8 +2,6 @@
 #include "display.h"
 #include "input.h"
 
-static int btn_state = 0;
-
 // when did we last update the ball position
 static unsigned long lastmove;
 // update the positions every _ milliseconds
@@ -140,19 +138,15 @@ void breakout_setup() {
 void breakout_loop() {
 	clear_display();
 
-	int val = analogRead(A0);
+	int val = pot_value(0);
 	paddle.pos = map(val, 1023-10, 0, 0, RES_X-paddle.width);
 
-	int new_val = digitalRead(BTN);
-	if (new_val == HIGH && btn_state == LOW) {
+	if (btn_pressed(0)) {
 		if (! ball.thrown) {
 			throw_ball(paddle.pos);
 		}
 	}
-	btn_state = new_val;
-
 	draw_items();
-	update_display();
 
 	// update the ball positions
 	if (millis() > lastmove+tick) {

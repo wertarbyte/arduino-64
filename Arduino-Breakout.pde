@@ -42,16 +42,14 @@
 
 
 void setup() { 
-	pinMode(A0, INPUT);
 	// used for seeding the RNG
 	pinMode(A1, INPUT);
-
-	pinMode(BTN, INPUT);
-
-	setup_display();
-
 	randomSeed(analogRead(A1));
 
+	setup_display();
+	setup_input();
+
+	// the actual game code
 	breakout_setup();
 }
 
