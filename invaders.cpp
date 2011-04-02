@@ -5,7 +5,7 @@
 // when did we last update the positions
 static unsigned long lastmove;
 // update the positions every _ milliseconds
-static int clock = 100;
+static int clock = 50;
 // How often did we update the positions?
 static unsigned long ticks = 1;
 
@@ -61,13 +61,13 @@ static boolean missile_hit(void) {
 }
 
 static void move_items(void) {
-	if (missile.fired) {
+	if (missile.fired && (ticks%2)==0) {
 		missile.y--;
 		// do we hit something?
 		missile_hit();
 	}
 	// every 10 ticks, we move the enemies
-	if (ticks % 10 == 0) {
+	if (ticks % 20 == 0) {
 		if (can_move_x(enemy_direction)) {
 			for (int i=0; i<ENEMIES; i++) {
 				enemy[i].x += enemy_direction;
@@ -77,7 +77,7 @@ static void move_items(void) {
 		}
 	}
 	// every 30 ticks, the invaders advance!
-	if (ticks % 30 == 0) {
+	if (ticks % 60 == 0) {
 		for (int i=0; i<ENEMIES; i++) {
 			enemy[i].y -= -1;
 		}
@@ -110,7 +110,8 @@ static void draw_items(void) {
 	}
 	/* missile */
 	if (missile.fired) {
-		set_pixel(missile.x, missile.y, true);
+		// we make the missile flicker
+		set_pixel(missile.x, missile.y, ((ticks%2)==0));
 	}
 	/* enemies */
 	for (int i=0; i<ENEMIES; i++) {
