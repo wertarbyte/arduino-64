@@ -1,9 +1,10 @@
 #include "WProgram.h"
 #include "input.h"
 
-#define BTN_CNT 1
+#define BTN_CNT 2
 static struct { uint8_t pin; boolean state; } button[BTN_CNT] = {
 	{ 7, LOW },
+	{ 2, LOW },
 };
 
 #define POT_CNT 1
