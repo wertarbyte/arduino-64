@@ -35,28 +35,12 @@
 
 */
 
-// shift register pins
-#define DATA 6
-#define CLOCK 5
-#define LATCH 4
+// functions for handling the display
+#include "display.h"
 
 #define BTN 7
 
-#define D_ROWS 5
-#define D_COLS 7
-
-// pins controlling the rows
-const int rows[D_ROWS] = {
-	12,
-	11,
-	10,
-	9,
-	8
-};
-
 int btn_state = 0;
-
-int active_row = 0;
 
 // when did we last update the ball position
 unsigned long lastmove;
@@ -77,17 +61,11 @@ struct {
 	boolean thrown;
 } ball;
 
-boolean blocks[D_ROWS][D_COLS];
-
-void load_line(byte line) {
-	digitalWrite(LATCH, LOW);
-	shiftOut(DATA, CLOCK, MSBFIRST, ~(line));
-	digitalWrite(LATCH, HIGH);
-}
+boolean blocks[RES_X][RES_Y];
 
 void throw_ball(int x) {
 	ball.x = x;
-	ball.y = D_ROWS-2;
+	ball.y = RES_Y-2;
 	ball.vx = 1;
 	ball.vy = 1;
 	ball.thrown = true;
@@ -95,17 +73,17 @@ void throw_ball(int x) {
 
 boolean bounce_ball() {
 	// detect collisions with the surroundings
-	if (ball.x - ball.vx < 0 || ball.x - ball.vx >= D_COLS) {
+	if (ball.x + ball.vx < 0 || ball.x + ball.vx >= RES_X) {
 		ball.vx *= -1;  
 		return true;
 	}
-	if (ball.y - ball.vy < 0) {
+	if (ball.y + ball.vy < 0) {
 		ball.vy *= -1;
 		return true;
 	}
 	// does the ball hit the paddle?
-	if ( (ball.y - ball.vy >= (D_ROWS-1)) &&
-	     (ball.x - ball.vx >= paddle.pos && (ball.x - ball.vx) < paddle.pos+paddle.width) ) {
+	if ( (ball.y + ball.vy >= (RES_Y-1)) &&
+	     (ball.x + ball.vx >= paddle.pos && (ball.x + ball.vx) < paddle.pos+paddle.width) ) {
 		ball.vy *= -1;
 		// detect contact with the paddle edge
 		if (ball.x < paddle.pos || ball.x >= paddle.pos+paddle.width) {
@@ -114,24 +92,24 @@ boolean bounce_ball() {
 		return true;
 	}
 	// did the ball pass the paddle?
-	if (ball.y - ball.vy > (D_ROWS-1)) {
+	if (ball.y + ball.vy > (RES_Y-1)) {
 		return false;
 	}
 	// handle block collisions
-	if (blocks[ball.y][ball.x - ball.vx]) {
-		blocks[ball.y][ball.x - ball.vx] = false;
-		ball.vx *= -1;
-		return true;
-	}
-	if (blocks[ball.y - ball.vy][ball.x]) {
-		blocks[ball.y - ball.vy][ball.x] = false;
+	if (blocks[ball.x][ball.y + ball.vy]) {
+		blocks[ball.x][ball.y + ball.vy] = false;
 		ball.vy *= -1;
 		return true;
 	}
-	if (blocks[ball.y - ball.vy][ball.x - ball.vx]) {
-		blocks[ball.y - ball.vy][ball.x - ball.vx] = false;
-		ball.vy *= -1;
+	if (blocks[ball.x + ball.vx][ball.y]) {
+		blocks[ball.x + ball.vx][ball.y] = false;
 		ball.vx *= -1;
+		return true;
+	}
+	if (blocks[ball.x + ball.vx][ball.y + ball.vy]) {
+		blocks[ball.x + ball.vx][ball.y + ball.vy] = false;
+		ball.vx *= -1;
+		ball.vy *= -1;
 		return true;
 	}
 	return false;
@@ -143,17 +121,17 @@ void move_ball() {
 	// bounce the ball around
 	while (bounce_ball());
 	// and move it once we have a new direction
-	ball.x -= ball.vx;
-	ball.y -= ball.vy;
+	ball.x += ball.vx;
+	ball.y += ball.vy;
 }
 
 void init_blocks() {
-	for (int r=0; r<D_ROWS; r++) {
-		for (int c=0; c<D_COLS; c++) {
-			if (r<2) {
-				blocks[r][c] = (random(2) == 0 ? true : false);
+	for (int x=0; x<RES_X; x++) {
+		for (int y=0; y<RES_Y; y++) {
+			if (y<3) {
+				blocks[x][y] = ( random(3) == 0 );
 			} else {
-				blocks[r][c] = false;
+				blocks[x][y] = false;
 			}
 		}
 	}
@@ -161,9 +139,9 @@ void init_blocks() {
 
 int blocks_left() {
 	int n = 0;
-	for (int r=0; r<D_ROWS; r++) {
-		for (int c=0; c<D_COLS; c++) {
-			if (blocks[r][c]) {
+	for (int x=0; x<RES_X; x++) {
+		for (int y=0; y<RES_Y; y++) {
+			if (blocks[x][y] == true) {
 				n++;
 			}
 		}
@@ -173,17 +151,12 @@ int blocks_left() {
 
 void setup() { 
 	pinMode(13, OUTPUT);
-	for (int i=0; i<D_ROWS; i++) {
-		pinMode(rows[i], OUTPUT);  
-	}
 
 	pinMode(A0, INPUT);
 	// used for seeding the RNG
 	pinMode(A1, INPUT);
 
-	pinMode(DATA, OUTPUT);
-	pinMode(CLOCK, OUTPUT);
-	pinMode(LATCH, OUTPUT);
+	setup_display();
 
 	paddle.width = 2;
 
@@ -194,10 +167,30 @@ void setup() {
 	lastmove = millis();
 }
 
+void draw_items(void) {
+	/* paddle */
+	for (int i=paddle.pos; i<paddle.pos+paddle.width; i++) {
+		set_pixel(i, RES_Y-1, true);
+	}
+	/* ball */
+	if (ball.thrown) {
+		set_pixel(ball.x, ball.y, true);
+	}
+	/* blocks */
+	for (int x=0; x<RES_X; x++) {
+		for (int y=0; y<RES_Y; y++) {
+			if (blocks[x][y]) {
+				set_pixel(x, y, true);
+			}
+		}
+	}
+}
+
 void loop() {
 	int val = analogRead(A0);
+	clear_display();
 
-	paddle.pos = map(val, 0, 1023-10, 0, D_COLS-paddle.width);
+	paddle.pos = map(val, 1023-10, 0, 0, RES_X-paddle.width);
 
 	int new_val = digitalRead(BTN);
 	if (new_val == HIGH && btn_state == LOW) {
@@ -207,29 +200,9 @@ void loop() {
 	}
 	btn_state = new_val;
 
-	digitalWrite(13, HIGH);   // set the LED on
+	draw_items();
 
-	int line = 0;
-	// draw blocks
-	for (int c=0; c<D_COLS; c++) {
-		if (blocks[active_row][c]) {
-			line |= (B1)<<c;
-		}
-	}
-
-	// draw the player
-	if (active_row == (D_ROWS-1)) {
-		line |= ((1<<paddle.width)-1)<<paddle.pos;
-	}
-	if (ball.thrown && active_row == ball.y) {
-		line |= B1<<(ball.x);
-	}
-	load_line(line);
-
-	digitalWrite(rows[active_row], HIGH);
-	delay(2);
-	digitalWrite(13, LOW);
-	digitalWrite(rows[active_row], LOW);  
+	update_display();
 
 	// update the ball positions
 	if (millis() > lastmove+tick) {
@@ -237,7 +210,7 @@ void loop() {
 		lastmove = millis();
 	}
 	// lost the ball?
-	if (ball.thrown && ball.y > (D_ROWS-1)) {
+	if (ball.thrown && ball.y > (RES_Y-1)) {
 		ball.thrown = false;
 	}  
 	// removed all blocks? restart
@@ -245,7 +218,4 @@ void loop() {
 		init_blocks();
 		ball.thrown = false;
 	}
-
-	// advance to next line
-	active_row = (active_row+1) % D_ROWS;
 }
