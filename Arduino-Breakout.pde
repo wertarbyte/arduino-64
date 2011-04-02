@@ -5,6 +5,7 @@
  Currently implemented subprograms:
    * Breakout
    * Conway's game of life
+   * (Space) Invaders
  
  The 5 rows of the LED matrix are connected directly
  to arduino pins, while the 7 columns are controlled
