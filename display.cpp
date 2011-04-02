@@ -13,6 +13,7 @@ static boolean display[RES_X][RES_Y];
 #define LATCH 4
 
 #define X_OFFSET 1
+#define Y_OFFSET -3
 
 /* Device size:
  * since the display is used in landscape orientation,
@@ -21,21 +22,9 @@ static boolean display[RES_X][RES_Y];
 #define D_ROWS RES_Y
 #define D_COLS RES_X
 
-// pins controlling the rows
-static const int rows[D_ROWS] = {
-	12,
-	11,
-	10,
-	9,
-	8
-};
-
 static int current_row = 0;
 
 void setup_display(void) {
-	for (int i=0; i<D_ROWS; i++) {
-		pinMode(rows[i], OUTPUT);  
-	}
 	pinMode(DATA, OUTPUT);
 	pinMode(CLOCK, OUTPUT);
 	pinMode(LATCH, OUTPUT);
@@ -62,10 +51,9 @@ void update_display(void) {
 		}
 	}
 	digitalWrite(LATCH, LOW);
+	shiftOut(DATA, CLOCK, LSBFIRST, 1<<(current_row-Y_OFFSET));
 	shiftOut(DATA, CLOCK, MSBFIRST, ~(line));
 	digitalWrite(LATCH, HIGH);
-	digitalWrite(rows[current_row], HIGH);
-	delay(1);
-	digitalWrite(rows[current_row], LOW);
+	delay(2);
 	current_row = (current_row+1)%D_ROWS;
 }
