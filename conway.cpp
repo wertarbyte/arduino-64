@@ -51,7 +51,7 @@ static void seed_field() {
 		for (int y=0; y < RES_Y; y++) {
 			if (ps->seed == S_PRESET) {
 				// mirror the y axis to reflect the presentation in the source
-				field[current][x][RES_Y-1-y] = ps->field[y][x];
+				field[current][x][y] = ps->field[y][x];
 			} else if (ps->seed == S_RANDOM) {
 				field[current][x][y] = (random(6)==0) ? true : false;
 			}
@@ -137,6 +137,14 @@ void conway_setup() {
 }
 
 void conway_loop() {
+	int pval = pot_value(0);
+	tick = map(pval, 0, 1023, 50, 2000);
+	if (btn_pressed(0)) {
+		clear_field();
+		active_preset = (active_preset+1)%N_PRESETS;
+		seed_field();
+		delay(100);
+	}
 	if (millis() > lastupdate+tick) {
 		int changes = update_field();
 		field_to_display();
