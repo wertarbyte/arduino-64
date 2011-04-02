@@ -1,5 +1,10 @@
 /*
- Implement a breakout style game on a 5x7 LED matrix
+ Implement a several games and programs
+ on a 5x7 LED matrix
+
+ Currently implemented subprograms:
+   * Breakout
+   * Conway's game of life
  
  The 5 rows of the LED matrix are connected directly
  to arduino pins, while the 7 columns are controlled
@@ -32,14 +37,21 @@
 
     Arduino A0       -> Poti 10 kOhm
     Arduino  7       -> push button
+    Arduino  1       -> push button
 
 */
 
 // functions for handling the display
 #include "display.h"
 #include "input.h"
-#include "breakout.h"
+#include "programs.h"
 
+static int current_program = 0;
+
+void load_program(int i) {
+	programs[i].init();
+	current_program = i;
+}
 
 void setup() { 
 	// used for seeding the RNG
@@ -49,11 +61,14 @@ void setup() {
 	setup_display();
 	setup_input();
 
-	// the actual game code
-	breakout_setup();
+	load_program(0);
 }
 
 void loop() {
-	breakout_loop();
 	update_display();
+	programs[current_program].loop();
+
+	if (btn_pressed(1)) {
+		load_program( (current_program+1)%PROGRAM_CNT );
+	}
 }
