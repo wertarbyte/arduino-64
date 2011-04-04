@@ -27,7 +27,7 @@ static void throw_ball(int x) {
 	ball.x = x;
 	ball.y = RES_Y-2;
 	ball.vx = 1;
-	ball.vy = 1;
+	ball.vy = -1;
 	ball.thrown = true;
 }
 
@@ -42,7 +42,7 @@ static boolean bounce_ball() {
 		return true;
 	}
 	// does the ball hit the paddle?
-	if ( (ball.y + ball.vy >= (RES_Y-1)) &&
+	if ( (ball.y + ball.vy >= (RES_Y-1)) && (ball.vy > 0) &&
 	     (ball.x + ball.vx >= paddle.pos && (ball.x + ball.vx) < paddle.pos+paddle.width) ) {
 		ball.vy *= -1;
 		// detect contact with the paddle edge
