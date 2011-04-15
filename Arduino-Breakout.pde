@@ -16,7 +16,7 @@
  Wiring instructions:
 
     Arduino  6       -> 74HC595 14 (DATA)
-    Arduino  5       -> 74HC595  9 (CLOCK)
+    Arduino  5       -> 74HC595 11 (CLOCK)
     Arduino  4       -> 74HC595 12 (LATCH)
 
     Arduino 12       -> Matrix  1 (Row 1)
@@ -48,7 +48,7 @@
 
     Arduino A0       -> Poti 10 kOhm
     Arduino  7       -> push button
-    Arduino  1       -> push button
+    Arduino  2       -> push button
 
 */
 
