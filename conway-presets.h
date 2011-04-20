@@ -1,4 +1,4 @@
-static int active_preset = 0;
+static int active_preset = 1;
 #define N_PRESETS 3
 // a nice starting configuration
 static const conway_preset presets[N_PRESETS]= {
@@ -6,11 +6,14 @@ static const conway_preset presets[N_PRESETS]= {
 		B_DEAD,
 		S_PRESET,
 		{
-			{ 0, 0, 0, 0, 0, 0, 0 },
-			{ 0, 0, 0, 1, 0, 0, 0 },
-			{ 0, 1, 1, 1, 0, 0, 0 },
-			{ 0, 0, 0, 1, 0, 0, 0 },
-			{ 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 1, 0, 0, 0 },
+			{ 0, 0, 1, 1, 1, 0, 0, 0 },
+			{ 0, 0, 0, 0, 1, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
 		}
 	},
 	{ // glider
@@ -28,6 +31,7 @@ static const conway_preset presets[N_PRESETS]= {
 		B_DEAD,
 		S_RANDOM,
 		{
+			{ 0, 0, 0, 0, 0, 0, 0 },
 			{ 0, 0, 0, 0, 0, 0, 0 },
 			{ 0, 0, 0, 0, 0, 0, 0 },
 			{ 0, 0, 0, 0, 0, 0, 0 },

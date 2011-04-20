@@ -3,8 +3,8 @@
 
 #define BTN_CNT 2
 static struct { uint8_t pin; boolean state; } button[BTN_CNT] = {
-	{ 7, LOW },
 	{ 2, LOW },
+	{ 7, LOW },
 };
 
 #define POT_CNT 1

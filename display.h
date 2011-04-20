@@ -1,5 +1,5 @@
-#define RES_X 7
-#define RES_Y 5
+#define RES_X 8
+#define RES_Y 8
 
 void setup_display(void);
 void set_pixel(int x, int y, boolean value);

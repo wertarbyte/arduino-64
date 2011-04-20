@@ -9,11 +9,11 @@ static byte display[RES_Y];
 
 // shift register pins
 #define DATA 6
-#define CLOCK 5
+#define CLOCK 3
 #define LATCH 4
 
-#define X_OFFSET 1
-#define Y_OFFSET -3
+#define X_OFFSET 0
+#define Y_OFFSET 0
 
 /* Device size:
  * since the display is used in landscape orientation,
@@ -55,7 +55,7 @@ void clear_display(void) {
 void update_display(void) {
 	digitalWrite(LATCH, LOW);
 	shiftOut(DATA, CLOCK, LSBFIRST, 1<<(current_row-Y_OFFSET));
-	shiftOut(DATA, CLOCK, LSBFIRST, ~(display[current_row]<<X_OFFSET));
+	shiftOut(DATA, CLOCK, LSBFIRST, (display[current_row]<<X_OFFSET));
 	digitalWrite(LATCH, HIGH);
 	current_row = (current_row+1)%D_ROWS;
 }
