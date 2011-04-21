@@ -1,7 +1,21 @@
-static int active_preset = 1;
-#define N_PRESETS 3
+static int active_preset = 0;
+#define N_PRESETS 4
 // a nice starting configuration
 static const conway_preset presets[N_PRESETS]= {
+	{ // nice flower
+		B_DEAD,
+		S_PRESET,
+		{
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 1, 0, 0 },
+			{ 0, 0, 0, 0, 1, 0, 1, 0 },
+			{ 0, 0, 0, 1, 1, 0, 1, 1 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+		}
+	},
 	{ // nice flower
 		B_DEAD,
 		S_PRESET,
