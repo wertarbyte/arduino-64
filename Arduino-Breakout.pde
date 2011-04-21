@@ -14,6 +14,8 @@
 #include "input.h"
 #include "programs.h"
 
+#include "TimerOne.h"
+
 static int current_program = 1;
 
 void load_program(int i) {
@@ -27,13 +29,15 @@ void setup() {
 	randomSeed(analogRead(A1));
 
 	setup_display();
+	// use Timer interrupt to update the display
+	Timer1.initialize();
+	Timer1.attachInterrupt(update_display, 500);
 	setup_input();
 
 	load_program(1);
 }
 
 void loop() {
-	update_display();
 	programs[current_program].loop();
 
 	if (btn_pressed(1)) {
