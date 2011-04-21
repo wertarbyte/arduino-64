@@ -34,7 +34,7 @@ void setup() {
 	Timer1.attachInterrupt(update_display, 500);
 	setup_input();
 
-	load_program(1);
+	load_program(3);
 }
 
 void loop() {
