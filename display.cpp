@@ -1,7 +1,9 @@
 #include "WProgram.h"
 #include "display.h"
 
-static byte display[RES_Y];
+static byte display[2][RES_Y];
+
+static int current = 0;
 
 /*
  *   7x5 LED Matrix connected through two shift registers
@@ -34,14 +36,14 @@ void setup_display(void) {
 void set_pixel(int x, int y, boolean value) {
 	//display[x][y] = value;
 	if (value) {
-		display[y] |= 1<<x;
+		display[!current][y] |= 1<<x;
 	} else {
-		display[y] &= ~(1<<x);
+		display[!current][y] &= ~(1<<x);
 	}
 }
 
 boolean get_pixel(int x, int y) {
-	return (display[y] & 1<<x) != 0;
+	return (display[!current][y] & 1<<x) != 0;
 }
 
 void clear_display(void) {
@@ -52,10 +54,14 @@ void clear_display(void) {
 	}
 }
 
+void swap_displays(void) {
+	current = !current;
+}
+
 void update_display(void) {
 	digitalWrite(LATCH, LOW);
 	shiftOut(DATA, CLOCK, LSBFIRST, 1<<(current_row-Y_OFFSET));
-	shiftOut(DATA, CLOCK, LSBFIRST, (display[current_row]<<X_OFFSET));
+	shiftOut(DATA, CLOCK, LSBFIRST, (display[current][current_row]<<X_OFFSET));
 	digitalWrite(LATCH, HIGH);
 	current_row = (current_row+1)%D_ROWS;
 }

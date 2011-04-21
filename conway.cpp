@@ -123,12 +123,12 @@ static int update_field() {
 }
 
 static void field_to_display(void) {
-	clear_display();
 	for (int x=0; x < RES_X; x++) {
                 for (int y=0; y < RES_Y; y++) {
 			set_pixel(x, y, field[current][x][y]);
 		}
 	}
+	swap_displays();
 }
 
 void conway_setup() { 

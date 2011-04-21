@@ -5,3 +5,4 @@ void setup_display(void);
 void set_pixel(int x, int y, boolean value);
 void clear_display(void);
 void update_display(void);
+void swap_displays(void);

@@ -147,6 +147,7 @@ void breakout_loop() {
 		}
 	}
 	draw_items();
+	swap_displays();
 
 	// update the ball positions
 	if (millis() > lastmove+tick) {

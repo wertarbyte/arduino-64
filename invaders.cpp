@@ -163,6 +163,7 @@ void invaders_loop() {
 		}
 	}
 	draw_items();
+	swap_displays();
 
 	// update the positions
 	if (millis() > lastmove+clock && game_state == RUNNING) {
