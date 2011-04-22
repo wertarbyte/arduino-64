@@ -4,7 +4,7 @@ AVRDUDE_CONF	= /etc/avrdude.conf
 AVRDUDE_ARD_BAUDRATE	= 115200
 AVRDUDE_ARD_PROGRAMMER	= arduino
 
-TARGET		= Arduino-Breakout
+TARGET		= Arduino-64
 ARDUINO_LIBS	= 
 
 MCU		= atmega328p

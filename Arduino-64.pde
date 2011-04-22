@@ -1,4 +1,6 @@
 /*
+ Arduino 64 - the 64 bit gaming platform 
+
  Implement a several games and programs
  on a 8x8 LED matrix
 
@@ -6,10 +8,10 @@
    * Breakout
    * Conway's game of life
    * (Space) Invaders
+   * Pong
 
 */
 
-// functions for handling the display
 #include "display.h"
 #include "input.h"
 #include "programs.h"
@@ -34,7 +36,7 @@ void setup() {
 	Timer1.attachInterrupt(update_display, 500);
 	setup_input();
 
-	load_program(3);
+	load_program(0);
 }
 
 void loop() {

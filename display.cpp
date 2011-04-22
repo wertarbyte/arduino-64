@@ -6,7 +6,7 @@ static byte display[2][RES_Y];
 static int current = 0;
 
 /*
- *   7x5 LED Matrix connected through two shift registers
+ *   8x8 LED Matrix connected through two shift registers
  */
 
 // shift register pins
@@ -17,13 +17,6 @@ static int current = 0;
 #define X_OFFSET 0
 #define Y_OFFSET 0
 
-/* Device size:
- * since the display is used in landscape orientation,
- * the X axis runs along the physical display rows
- */
-#define D_ROWS RES_Y
-#define D_COLS RES_X
-
 static int current_row = 0;
 
 void setup_display(void) {
@@ -31,10 +24,10 @@ void setup_display(void) {
 	pinMode(CLOCK, OUTPUT);
 	pinMode(LATCH, OUTPUT);
 	clear_display();
+	swap_displays();
 }
 
 void set_pixel(int x, int y, boolean value) {
-	//display[x][y] = value;
 	if (value) {
 		display[!current][y] |= 1<<x;
 	} else {
@@ -63,5 +56,5 @@ void update_display(void) {
 	shiftOut(DATA, CLOCK, LSBFIRST, 1<<(current_row-Y_OFFSET));
 	shiftOut(DATA, CLOCK, LSBFIRST, (display[current][current_row]<<X_OFFSET));
 	digitalWrite(LATCH, HIGH);
-	current_row = (current_row+1)%D_ROWS;
+	current_row = (current_row+1)%RES_Y;
 }
