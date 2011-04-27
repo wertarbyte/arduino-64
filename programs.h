@@ -2,14 +2,17 @@
 #include "conway.h"
 #include "invaders.h"
 #include "pong.h"
+#include "wopr.h"
 
 struct program {
 	void (*init)(void);
 	void (*loop)(void);
 };
 
-#define PROGRAM_CNT 4
-program programs[PROGRAM_CNT] = {
+#define PROGRAM_CNT 5
+program programs[] = {
+	/* WOPR */
+	{ &wopr_setup, &wopr_loop },
 	/* Breakout */
 	{ &breakout_setup, &breakout_loop },
 	/* Conway's Game of Life */
