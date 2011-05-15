@@ -7,8 +7,8 @@ AVRDUDE_ARD_PROGRAMMER	= arduino
 TARGET		= Arduino-64
 ARDUINO_LIBS	= 
 
-MCU		= atmega328p
-F_CPU		= 16000000
+MCU		= atmega168
+F_CPU		= 8000000
 ARDUINO_PORT	= /dev/arduino
 
 include Arduino.mk

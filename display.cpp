@@ -11,8 +11,8 @@ static int current = 0;
 
 // shift register pins
 #define DATA 6
-#define CLOCK 3
-#define LATCH 4
+#define CLOCK 4
+#define LATCH 3
 
 #define X_OFFSET 0
 #define Y_OFFSET 0
