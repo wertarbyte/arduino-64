@@ -19,7 +19,8 @@ class Controller {
 			LEFT,
 			RIGHT,
 		};
-		bool pressed(Controller::Button btn);
+		bool virtual pressed(Controller::Button btn);
+		bool virtual pressed(Controller::Button btn, bool edge);
 };
 
 #endif

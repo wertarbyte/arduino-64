@@ -139,13 +139,13 @@ void conway_setup() {
 }
 
 void conway_loop() {
-	if (input.pressed(Controller::UP)) {
-		tick += 50;
+	if (input.pressed(Controller::UP, false)) {
+		tick++;
 	}
-	if (input.pressed(Controller::UP)) {
-		tick -= 50;
+	if (input.pressed(Controller::DOWN, false)) {
+		tick--;
 	}
-	if (tick < 10) tick = 10;
+	if (tick < 0) tick = 0;
 
 	if (input.pressed(Controller::A)) {
 		clear_field();

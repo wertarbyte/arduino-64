@@ -24,13 +24,13 @@ void wopr_setup() {
 }
 
 void wopr_loop() {
-	if (input.pressed(Controller::UP)) {
-		tick += 50;
+	if (input.pressed(Controller::UP, false)) {
+		tick += 1;
 	}
-	if (input.pressed(Controller::DOWN)) {
-		tick -= 50;
+	if (input.pressed(Controller::DOWN, false)) {
+		tick -= 1;
 	}
-	if (tick < 10) tick = 10;
+	if (tick < 0) tick = 0;
 
 	if (millis() > lastupdate+tick || input.pressed(Controller::A)) {
 		change_display();

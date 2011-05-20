@@ -32,5 +32,13 @@ void Controller::refresh() {
 }
 
 bool Controller::pressed(Controller::Button btn) {
-	return (state & 1<<btn) && (~oldstate & 1<<btn);
+	pressed(btn, true);
+}
+
+bool Controller::pressed(Controller::Button btn, bool edge) {
+	if (edge) {
+		return (state & 1<<btn) && (~oldstate & 1<<btn);
+	} else {
+		return (state & 1<<btn);
+	}
 }
