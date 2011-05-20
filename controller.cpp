@@ -31,10 +31,6 @@ void Controller::refresh() {
 	fetchState();
 }
 
-bool Controller::pressed(Controller::Button btn) {
-	pressed(btn, true);
-}
-
 bool Controller::pressed(Controller::Button btn, bool edge) {
 	if (edge) {
 		return (state & 1<<btn) && (~oldstate & 1<<btn);
