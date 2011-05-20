@@ -1,6 +1,8 @@
 #include "WProgram.h"
 #include "display.h"
-#include "input.h"
+#include "controller.h"
+
+extern Controller input;
 
 // when did we last update the positions
 static unsigned long lastmove;
@@ -154,10 +156,14 @@ void invaders_setup() {
 void invaders_loop() {
 	clear_display();
 
-	int val = pot_value(0);
-	ship.pos = map(val, 1023-10, 0, 0, RES_X-ship.width);
+	if (input.pressed(Controller::LEFT) && ship.pos < RES_X-ship.width) {
+		ship.pos++;
+	}
+	if (input.pressed(Controller::RIGHT) && ship.pos > 0) {
+		ship.pos--;
+	}
 
-	if (btn_pressed(0)) {
+	if (input.pressed(Controller::A)) {
 		if (! missile.fired && game_state == RUNNING) {
 			fire_missile();
 		}

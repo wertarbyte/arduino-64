@@ -1,6 +1,8 @@
 #include "WProgram.h"
 #include "display.h"
-#include "input.h"
+#include "controller.h"
+
+extern Controller input;
 
 // How do we handle the border of the field?
 enum border_type {
@@ -137,9 +139,15 @@ void conway_setup() {
 }
 
 void conway_loop() {
-	int pval = pot_value(0);
-	tick = map(pval, 0, 1023, 50, 2000);
-	if (btn_pressed(0)) {
+	if (input.pressed(Controller::UP)) {
+		tick += 50;
+	}
+	if (input.pressed(Controller::UP)) {
+		tick -= 50;
+	}
+	if (tick < 10) tick = 10;
+
+	if (input.pressed(Controller::A)) {
 		clear_field();
 		active_preset = (active_preset+1)%N_PRESETS;
 		seed_field();

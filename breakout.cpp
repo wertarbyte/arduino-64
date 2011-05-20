@@ -1,6 +1,8 @@
 #include "WProgram.h"
 #include "display.h"
-#include "input.h"
+#include "controller.h"
+
+extern Controller input;
 
 // when did we last update the ball position
 static unsigned long lastmove;
@@ -138,10 +140,14 @@ void breakout_setup() {
 void breakout_loop() {
 	clear_display();
 
-	int val = pot_value(0);
-	paddle.pos = map(val, 1023-10, 0, 0, RES_X-paddle.width);
+	if (input.pressed(Controller::RIGHT) && paddle.pos > 0) {
+		paddle.pos--;
+	}
+	if (input.pressed(Controller::LEFT) && paddle.pos < RES_X-paddle.width) {
+		paddle.pos++;
+	}
 
-	if (btn_pressed(0)) {
+	if (input.pressed(Controller::A)) {
 		if (! ball.thrown) {
 			throw_ball(paddle.pos);
 		}

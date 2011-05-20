@@ -1,6 +1,8 @@
 #include "WProgram.h"
 #include "display.h"
-#include "input.h"
+#include "controller.h"
+
+extern Controller input;
 
 // when did we last update the ecosphere
 static unsigned long lastupdate;
@@ -22,9 +24,15 @@ void wopr_setup() {
 }
 
 void wopr_loop() {
-	int pval = pot_value(0);
-	tick = map(pval, 0, 1023, 50, 2000);
-	if (millis() > lastupdate+tick) {
+	if (input.pressed(Controller::UP)) {
+		tick += 50;
+	}
+	if (input.pressed(Controller::DOWN)) {
+		tick -= 50;
+	}
+	if (tick < 10) tick = 10;
+
+	if (millis() > lastupdate+tick || input.pressed(Controller::A)) {
 		change_display();
 		lastupdate = millis();
 	}

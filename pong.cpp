@@ -1,6 +1,6 @@
 #include "WProgram.h"
 #include "display.h"
-#include "input.h"
+#include "controller.h"
 
 
 // when did we last update the ball position
