@@ -2,6 +2,7 @@
 #include "display.h"
 #include "controller.h"
 
+extern Controller input;
 
 // when did we last update the ball position
 static unsigned long lastmove;
@@ -14,13 +15,14 @@ struct paddle {
 	int pos;
 	int target;
 	const int width;
+	Controller *ctl;
 };
 
 static int serving = 0;
 
 static struct paddle player[2] = {
-	{ 0,       RES_Y/2-1, RES_Y/2-1, 3 },
-	{ RES_X-1, RES_Y/2-1, RES_Y/2-1, 3 },
+	{ 0,       RES_Y/2-1, RES_Y/2-1, 3, NULL },
+	{ RES_X-1, RES_Y/2-1, RES_Y/2-1, 3, NULL },
 };
 
 static struct {
@@ -116,16 +118,24 @@ static int aim(int x) {
 static void move_paddles(void) {
 	for (uint8_t i=0; i<2; i++) {
 		volatile struct paddle *p = &player[i];
-		if (p->target < p->pos) p->pos--;
-		else if (p->target > p->pos) p->pos++;
-		else {
-			int prediction = aim(p->row);
-			if (prediction < 0) {
-				p->target = random( RES_Y-p->width );
-			} else {
-				p->target = max(0, min(prediction, RES_Y-p->width));
+		if (p->ctl != NULL) {
+			// manual control enabled
+			if (p->ctl->pressed(Controller::LEFT, false)) p->pos++;
+			if (p->ctl->pressed(Controller::RIGHT, false)) p->pos--;
+		} else {
+			if (p->target < p->pos) p->pos--;
+			else if (p->target > p->pos) p->pos++;
+			else {
+				int prediction = aim(p->row);
+				if (prediction < 0) {
+					p->target = random( RES_Y-p->width );
+				} else {
+					p->target = max(0, min(prediction, RES_Y-p->width));
+				}
 			}
 		}
+		// ensure the position is valid
+		p->pos = max(0, min(p->pos, RES_Y-p->width));
 	}
 }
 
@@ -138,6 +148,15 @@ void pong_loop() {
 
 	draw_items();
 	swap_displays();
+
+	// take over a player?
+	if (input.pressed(Controller::START)) {
+		if (player[0].ctl == NULL) {
+			player[0].ctl = &input;
+		} else {
+			player[0].ctl = NULL;
+		}
+	}
 
 	// update the ball positions
 	if (millis() > lastmove+tick) {
