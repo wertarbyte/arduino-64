@@ -1,24 +1,16 @@
+#include "program.h"
+#include "wopr.h"
+#include "pong.h"
 #include "breakout.h"
 #include "conway.h"
 #include "invaders.h"
-#include "pong.h"
-#include "wopr.h"
 
-struct program {
-	void (*init)(void);
-	void (*loop)(void);
+Program *programs[] = {
+	new WOPR(),
+	new Conway(),
+	new Pong(),
+	new Breakout(),
+	new Invaders(),
 };
 
-#define PROGRAM_CNT 5
-program programs[] = {
-	/* WOPR */
-	{ &wopr_setup, &wopr_loop },
-	/* Breakout */
-	{ &breakout_setup, &breakout_loop },
-	/* Conway's Game of Life */
-	{ &conway_setup, &conway_loop },
-	/* Space Invaders */
-	{ &invaders_setup, &invaders_loop },
-	/* Pong */
-	{ &pong_setup, &pong_loop },
-};
+#define PROGRAM_CNT (sizeof(programs)/sizeof(programs[0]))

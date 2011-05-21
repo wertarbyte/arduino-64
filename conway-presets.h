@@ -1,7 +1,6 @@
-static int active_preset = 0;
 #define N_PRESETS 4
 // a nice starting configuration
-static const conway_preset presets[N_PRESETS]= {
+Conway::conway_preset Conway::presets[] = {
 	{ // nice flower
 		B_DEAD,
 		S_PRESET,

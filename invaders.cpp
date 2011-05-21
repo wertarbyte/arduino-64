@@ -4,42 +4,17 @@
 
 extern Controller input;
 
-// when did we last update the positions
-static unsigned long lastmove;
-// update the positions every _ milliseconds
-static int clock = 50;
-// How often did we update the positions?
-static unsigned long ticks = 1;
+#include "invaders.h"
 
-static struct {
-	// position (the left edge of the ship)
-	int pos;
-	int width;
-} ship;
+Invaders::Invaders() : ticks(1), enemy_direction(1) {
+	ship.width = 3;
+	missile.x = 0;
+	missile.y = 0;
+	missile.fired = false;
+}
 
-static struct {
-	int x;
-	int y;
-	boolean fired;
-} missile;
-
-enum state {
-	RUNNING,
-	WON,
-	LOST,
-} game_state;
-
-short enemy_direction = 1;
-
-#define ENEMIES 17
-static struct {
-	int x;
-	int y;
-	boolean alive;
-} enemy[ENEMIES];
-
-boolean can_move_x(int dir) {
-	for (int i=0; i<ENEMIES; i++) {
+bool Invaders::can_move_x(int dir) {
+	for (int i=0; i<n_enemies; i++) {
 		int xpos = enemy[i].x+dir;
 		if (enemy[i].alive && (xpos > RES_X-1 || xpos < 0)) {
 			return false;
@@ -48,8 +23,8 @@ boolean can_move_x(int dir) {
 	return true;
 }
 
-static boolean missile_hit(void) {
-	for (int i=0; i<ENEMIES; i++) {
+bool Invaders::missile_hit(void) {
+	for (int i=0; i<n_enemies; i++) {
 		if (enemy[i].alive && missile.fired &&
 		    enemy[i].x == missile.x &&
 		    enemy[i].y == missile.y
@@ -62,7 +37,7 @@ static boolean missile_hit(void) {
 	return true;
 }
 
-static void move_items(void) {
+void Invaders::move_items(void) {
 	if (missile.fired && (ticks%2)==0) {
 		missile.y--;
 		// do we hit something?
@@ -71,7 +46,7 @@ static void move_items(void) {
 	// every 10 ticks, we move the enemies
 	if (ticks % 20 == 0) {
 		if (can_move_x(enemy_direction)) {
-			for (int i=0; i<ENEMIES; i++) {
+			for (int i=0; i<n_enemies; i++) {
 				enemy[i].x += enemy_direction;
 			}
 		} else {
@@ -80,16 +55,16 @@ static void move_items(void) {
 	}
 	// every 30 ticks, the invaders advance!
 	if (ticks % 60 == 0) {
-		for (int i=0; i<ENEMIES; i++) {
+		for (int i=0; i<n_enemies; i++) {
 			enemy[i].y -= -1;
 		}
 	}
 
 }
 
-static state get_gamestate(void) {
+Invaders::state_t Invaders::get_gamestate(void) {
 	int alive = 0;
-	for (int i=0; i<ENEMIES; i++) {
+	for (int i=0; i<n_enemies; i++) {
 		if (enemy[i].alive && enemy[i].y >= RES_Y-1) {
 			return LOST; // invaders won
 		}
@@ -105,7 +80,7 @@ static state get_gamestate(void) {
 
 }
 
-static void draw_items(void) {
+void Invaders::draw_items(void) {
 	/* ship */
 	for (int i=ship.pos; i<ship.pos+ship.width; i++) {
 		set_pixel(i, RES_Y-1, true);
@@ -116,23 +91,23 @@ static void draw_items(void) {
 		set_pixel(missile.x, missile.y, ((ticks%2)==0));
 	}
 	/* enemies */
-	for (int i=0; i<ENEMIES; i++) {
+	for (int i=0; i<n_enemies; i++) {
 		if (enemy[i].alive && enemy[i].y>=0 && enemy[i].y<RES_Y) {
 			set_pixel(enemy[i].x, enemy[i].y, true);
 		}
 	}
 }
 
-static void fire_missile() {
+void Invaders::fire_missile() {
 	missile.x = ship.pos+1;
 	missile.y = RES_Y-1;
 	missile.fired = true;
 }
 
-static void create_enemies() {
+void Invaders::create_enemies() {
 	int x=2;
 	int y=RES_Y-4;
-	for (int i=0; i<ENEMIES; i++) {
+	for (int i=0; i<n_enemies; i++) {
 		if (x>=RES_X-2) {
 			x = 1;
 			y -= 2;
@@ -144,17 +119,21 @@ static void create_enemies() {
 	}
 }
 
-void invaders_setup() { 
-	ticks = 1;
-	ship.width = 3;
-	ship.pos = 0;
+void Invaders::init() { 
 	lastmove = millis();
 	create_enemies();
+	ship.pos = 0;
+	missile.x = 0;
+	missile.y = 0;
+	missile.fired = false;
 	game_state = RUNNING;
 }
 
-void invaders_loop() {
+void Invaders::loop() {
 	clear_display();
+	if (input.pressed(Controller::START)) {
+		init();
+	}
 
 	if (input.pressed(Controller::LEFT) && ship.pos < RES_X-ship.width) {
 		ship.pos++;

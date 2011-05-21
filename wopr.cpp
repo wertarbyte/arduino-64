@@ -4,26 +4,21 @@
 
 extern Controller input;
 
-// when did we last update the ecosphere
-static unsigned long lastupdate;
-// update the positions every _ milliseconds
-static int tick = 300;
+#include "wopr.h"
 
-static int probability = 4;
-
-static void change_display(void) {
+void WOPR::change_display(void) {
 	for (int x=0; x < RES_X; x++) {
-                for (int y=0; y < RES_Y; y++) {
+		for (int y=0; y < RES_Y; y++) {
 			set_pixel(x, y, random(4)==0);
 		}
 	}
 	swap_displays();
 }
 
-void wopr_setup() { 
+WOPR::WOPR() : tick(300), probability(4), lastupdate(0) {
 }
 
-void wopr_loop() {
+void WOPR::loop() {
 	if (input.pressed(Controller::UP, false)) {
 		tick += 1;
 	}

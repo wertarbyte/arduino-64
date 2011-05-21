@@ -4,42 +4,16 @@
 
 extern Controller input;
 
-// when did we last update the ball position
-static unsigned long lastmove;
-// update the positions every _ milliseconds
-static int tick = 300;
+#include "pong.h"
 
-struct paddle {
-	int row;
-	// position (the left edge of the paddle)
-	int pos;
-	int target;
-	const int width;
-	Controller *ctl;
-};
+Pong::Pong() : serving(0), tick(300) {
+	player[0] = (struct paddle){0, RES_Y/2-1, RES_Y/2-1, 3, NULL};
+	player[1] = (struct paddle){RES_X-1, RES_Y/2-1, RES_Y/2-1, 3, NULL};
 
-static int serving = 0;
+	ball = (struct ball){ RES_X/2-1, RES_Y/2-1, 1, 1, false };
+}
 
-static struct paddle player[2] = {
-	{ 0,       RES_Y/2-1, RES_Y/2-1, 3, NULL },
-	{ RES_X-1, RES_Y/2-1, RES_Y/2-1, 3, NULL },
-};
-
-static struct {
-	int xpos;
-	int ypos;
-	int dx;
-	int dy;
-	boolean thrown;
-} ball = {
-	RES_X/2-1,
-	RES_Y/2-1,
-	1,
-	1,
-	false
-};
-
-static void draw_items(void) {
+void Pong::draw_items(void) {
 	// draw paddles
 	for (int i=0; i<2; i++) {
 		struct paddle *p = &player[i];
@@ -53,7 +27,7 @@ static void draw_items(void) {
 	}
 }
 
-static boolean bounce_ball(void) {
+boolean Pong::bounce_ball(void) {
 	int nx = ball.xpos + ball.dx;
 	int ny = ball.ypos + ball.dy;
 	/* collision with upper/lower border */
@@ -78,7 +52,7 @@ static boolean bounce_ball(void) {
 	return 0;
 }
 
-static void serve_ball(void) {
+void Pong::serve_ball(void) {
 	int dir = ((player[serving].row - player[!serving].row) > 0 ? -1 : 1);
 	ball.xpos = player[serving].row + dir;
 	ball.ypos = player[serving].pos;
@@ -88,7 +62,7 @@ static void serve_ball(void) {
 	serving = !serving;
 }
 
-static void move_ball(void) {
+void Pong::move_ball(void) {
 	while (bounce_ball());
 	ball.xpos += ball.dx;
 	ball.ypos += ball.dy;
@@ -97,7 +71,7 @@ static void move_ball(void) {
 	}
 }
 
-static int aim(int x) {
+int Pong::aim(int x) {
 	int8_t dist_x = x - ball.xpos;
 	// how many ticks until it intersects?
 	int8_t t = dist_x/ball.dx;
@@ -115,7 +89,7 @@ static int aim(int x) {
 	return y;
 }
 
-static void move_paddles(void) {
+void Pong::move_paddles(void) {
 	for (uint8_t i=0; i<2; i++) {
 		volatile struct paddle *p = &player[i];
 		if (p->ctl != NULL) {
@@ -139,11 +113,11 @@ static void move_paddles(void) {
 	}
 }
 
-void pong_setup() { 
+void Pong::init() {
 	lastmove = millis();
 }
 
-void pong_loop() {
+void Pong::loop() {
 	clear_display();
 
 	draw_items();

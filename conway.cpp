@@ -4,29 +4,13 @@
 
 extern Controller input;
 
-// How do we handle the border of the field?
-enum border_type {
-	B_DEAD,
-	B_ALIVE,
-	B_WRAPPED,
-};
+#include "conway.h"
 
-enum seed_style {
-	// load a predefined configuration on start
-	S_PRESET,
-	// populate the field randomly
-	S_RANDOM
-};
+#include "conway-presets.h"
 
-// when did we last update the ecosphere
-static unsigned long lastupdate;
-// update the positions every _ milliseconds
-static int tick = 300;
+Conway::Conway() : tick(300), current(0), active_preset(0), lastupdate(0) {}
 
-static int current = 0;
-static boolean field[2][RES_X][RES_Y];
-
-static void clear_field() {
+void Conway::clear_field() {
 	for (int x=0; x < RES_X; x++) {
 		for (int y=0; y < RES_Y; y++) {
 			field[current][x][y] = false;
@@ -34,20 +18,7 @@ static void clear_field() {
 	}
 }
 
-typedef struct {
-	border_type border;
-	seed_style seed;
-	/* to make designing presets easier, this is swapped */
-	bool field[RES_Y][RES_X];
-} conway_preset;
-
-#include <conway-presets.h>
-
-static inline const conway_preset *get_preset() {
-	return &presets[active_preset];
-}
-
-static void seed_field() {
+void Conway::seed_field() {
 	const conway_preset *ps = get_preset();
 	for (int x=0; x < RES_X; x++) {
 		for (int y=0; y < RES_Y; y++) {
@@ -61,7 +32,7 @@ static void seed_field() {
 	}
 }
 
-static int cells_alive() {
+int Conway::cells_alive() {
 	int n = 0;
 	for (int x=0; x < RES_X; x++) {
 		for (int y=0; y < RES_Y; y++) {
@@ -73,7 +44,7 @@ static int cells_alive() {
 	return n;
 }
 
-static short neighbours(int x, int y, boolean f[RES_X][RES_Y]) {
+short Conway::neighbours(int x, int y, bool f[RES_X][RES_Y]) {
 	const conway_preset *ps = get_preset();
 	int n = 0;
 	for (int dx=-1; dx<=+1; dx++) {
@@ -96,7 +67,7 @@ static short neighbours(int x, int y, boolean f[RES_X][RES_Y]) {
         return n;
 }
 
-static int update_field() {
+int Conway::update_field() {
         int changes = 0;
         int next = 1 - current;
         for (int x=0; x < RES_X; x++) {
@@ -124,7 +95,7 @@ static int update_field() {
         return changes;
 }
 
-static void field_to_display(void) {
+void Conway::field_to_display(void) {
 	for (int x=0; x < RES_X; x++) {
                 for (int y=0; y < RES_Y; y++) {
 			set_pixel(x, y, field[current][x][y]);
@@ -133,12 +104,14 @@ static void field_to_display(void) {
 	swap_displays();
 }
 
-void conway_setup() { 
+void Conway::init() { 
 	clear_field();
 	seed_field();
+	field_to_display();
+	lastupdate = millis();
 }
 
-void conway_loop() {
+void Conway::loop() {
 	if (input.pressed(Controller::UP, false)) {
 		tick++;
 	}

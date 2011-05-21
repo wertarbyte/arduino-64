@@ -4,28 +4,24 @@
 
 extern Controller input;
 
-// when did we last update the ball position
-static unsigned long lastmove;
-// update the positions every _ milliseconds
-static int tick = 500;
+#include "breakout.h"
 
-static struct {
-	// position (the left edge of the paddle)
-	int pos;
-	int width;
-} paddle;
+Breakout::Breakout() : tick(500) {
+	paddle.width = 3;
+	paddle.pos = RES_X/2-(paddle.width/2);
+	ball.x = 0;
+	ball.y = RES_Y-2;
+	ball.vx = 1;
+	ball.vy = -1;
+	ball.thrown = false;
+}
 
-static struct {
-	int x;
-	int y;
-	int vx;
-	int vy;
-	boolean thrown;
-} ball;
+void Breakout::init() {
+	init_blocks();
+	lastmove = millis();
+}
 
-static boolean blocks[RES_X][RES_Y];
-
-static void throw_ball(int x) {
+void Breakout::throw_ball(int x) {
 	ball.x = x;
 	ball.y = RES_Y-2;
 	ball.vx = 1;
@@ -33,7 +29,7 @@ static void throw_ball(int x) {
 	ball.thrown = true;
 }
 
-static boolean bounce_ball() {
+bool Breakout::bounce_ball() {
 	// detect collisions with the surroundings
 	if (ball.x + ball.vx < 0 || ball.x + ball.vx >= RES_X) {
 		ball.vx *= -1;  
@@ -77,7 +73,7 @@ static boolean bounce_ball() {
 	return false;
 }
 
-static void move_ball() {
+void Breakout::move_ball() {
 	if (! ball.thrown) return;
 
 	// bounce the ball around
@@ -87,7 +83,7 @@ static void move_ball() {
 	ball.y += ball.vy;
 }
 
-static void init_blocks() {
+void Breakout::init_blocks() {
 	for (int x=0; x<RES_X; x++) {
 		for (int y=0; y<RES_Y; y++) {
 			if (y<1) {
@@ -99,7 +95,7 @@ static void init_blocks() {
 	}
 }
 
-static int blocks_left() {
+int Breakout::blocks_left() {
 	int n = 0;
 	for (int x=0; x<RES_X; x++) {
 		for (int y=0; y<RES_Y; y++) {
@@ -111,7 +107,7 @@ static int blocks_left() {
 	return n;
 }
 
-static void draw_items(void) {
+void Breakout::draw_items(void) {
 	/* paddle */
 	for (int i=paddle.pos; i<paddle.pos+paddle.width; i++) {
 		set_pixel(i, RES_Y-1, true);
@@ -130,14 +126,7 @@ static void draw_items(void) {
 	}
 }
 
-void breakout_setup() { 
-	paddle.width = 2;
-	paddle.pos = 1;
-	init_blocks();
-	lastmove = millis();
-}
-
-void breakout_loop() {
+void Breakout::loop() {
 	clear_display();
 
 	if (input.pressed(Controller::RIGHT) && paddle.pos > 0) {
