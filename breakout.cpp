@@ -7,6 +7,10 @@ extern Controller input;
 #include "breakout.h"
 
 Breakout::Breakout() : tick(500) {
+	init();
+}
+
+void Breakout::init() {
 	paddle.width = 3;
 	paddle.pos = RES_X/2-(paddle.width/2);
 	ball.x = 0;
@@ -14,9 +18,7 @@ Breakout::Breakout() : tick(500) {
 	ball.vx = 1;
 	ball.vy = -1;
 	ball.thrown = false;
-}
 
-void Breakout::init() {
 	init_blocks();
 	lastmove = millis();
 }
@@ -86,8 +88,8 @@ void Breakout::move_ball() {
 void Breakout::init_blocks() {
 	for (int x=0; x<RES_X; x++) {
 		for (int y=0; y<RES_Y; y++) {
-			if (y<1) {
-				blocks[x][y] = ( random(3) == 0 );
+			if (y<RES_Y-2) {
+				blocks[x][y] = ( random(y+1) == 0 );
 			} else {
 				blocks[x][y] = false;
 			}
@@ -128,6 +130,11 @@ void Breakout::draw_items(void) {
 
 void Breakout::loop() {
 	clear_display();
+
+	if (input.pressed(Controller::START)) {
+		init();
+		return;
+	}
 
 	if (input.pressed(Controller::RIGHT) && paddle.pos > 0) {
 		paddle.pos--;
