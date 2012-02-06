@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "WProgram.h"
+#include "Arduino.h"
 #include "controller.h"
 
 Controller::Controller(uint8_t istrobe, uint8_t iclock, uint8_t idata) :

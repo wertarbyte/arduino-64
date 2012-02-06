@@ -1,4 +1,4 @@
-#include "WProgram.h"
+#include "Arduino.h"
 #include "display.h"
 
 static byte display[2][RES_Y];
